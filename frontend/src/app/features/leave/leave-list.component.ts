@@ -72,8 +72,9 @@ export class LeaveListComponent implements OnInit {
       return;
     }
     const raw = this.form.value;
+    const base: Partial<LeaveRequest> = this.editing && this.editing.id ? { id: this.editing.id } : {};
     const payload: LeaveRequest = {
-      ...this.editing,
+      ...base,
       employeeId: raw.employeeId,
       startDate: (raw.startDate as Date).toISOString().substring(0, 10),
       endDate: (raw.endDate as Date).toISOString().substring(0, 10),
