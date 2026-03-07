@@ -1,0 +1,65 @@
+<mat-card>
+  <mat-card-title>Departments</mat-card-title>
+  <mat-card-content>
+    <table mat-table [dataSource]="departments" class="mat-elevation-z1">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let d">{{ d.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="code">
+        <th mat-header-cell *matHeaderCellDef>Code</th>
+        <td mat-cell *matCellDef="let d">{{ d.code }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="managerName">
+        <th mat-header-cell *matHeaderCellDef>Manager</th>
+        <td mat-cell *matCellDef="let d">{{ d.managerName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let d">
+          <button mat-button color="primary" (click)="startEdit(d)">Edit</button>
+          <button mat-button color="warn" (click)="delete(d)">Delete</button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="form-card">
+  <mat-card-title>{{ editing ? 'Edit department' : 'Create department' }}</mat-card-title>
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name">
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Code</mat-label>
+        <input matInput formControlName="code">
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Manager</mat-label>
+        <input matInput formControlName="managerName">
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+        {{ editing ? 'Update' : 'Create' }}
+      </button>
+      <button mat-button type="button" (click)="startCreate()">Clear</button>
+    </form>
+  </mat-card-content>
+</mat-card>
+

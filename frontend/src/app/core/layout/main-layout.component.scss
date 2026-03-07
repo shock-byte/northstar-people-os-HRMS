@@ -1,0 +1,26 @@
+.shell {
+  height: 100vh;
+  background: transparent;
+}
+
+.content {
+  padding: 24px;
+  box-sizing: border-box;
+  min-height: calc(100vh - 64px);
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 24px 0 0 0;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+mat-sidenav {
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(248, 250, 252, 0.98);
+  box-shadow: 8px 0 30px rgba(148, 163, 184, 0.45);
+}
+

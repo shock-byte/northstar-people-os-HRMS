@@ -1,0 +1,87 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$hrms-primary: mat.define-palette(mat.$indigo-palette);
+$hrms-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$hrms-warn: mat.define-palette(mat.$red-palette);
+
+$hrms-theme: mat.define-light-theme((
+  color: (
+    primary: $hrms-primary,
+    accent: $hrms-accent,
+    warn: $hrms-warn
+  )
+));
+
+@include mat.all-component-themes($hrms-theme);
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(191, 219, 254, 0.8), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(221, 239, 253, 0.9), transparent 55%),
+    linear-gradient(135deg, #f9fafb 0%, #e0f2fe 40%, #eff6ff 100%);
+  color: #0f172a;
+}
+
+button[mat-button],
+button[mat-raised-button],
+button[mat-flat-button],
+button[mat-stroked-button] {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+button[mat-raised-button],
+button[mat-flat-button] {
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.55);
+}
+
+button[mat-button]:active,
+button[mat-raised-button]:active,
+button[mat-flat-button]:active,
+button[mat-stroked-button]:active {
+  transform: scale(0.97) translateY(1px);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.65);
+}
+
+button[mat-button]::after,
+button[mat-raised-button]::after,
+button[mat-flat-button]::after,
+button[mat-stroked-button]::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(248, 250, 252, 0.2);
+  border-radius: 999px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.25s ease-out,
+    height 0.25s ease-out,
+    opacity 0.35s ease-out;
+  opacity: 0;
+}
+
+button[mat-button]:active::after,
+button[mat-raised-button]:active::after,
+button[mat-flat-button]:active::after,
+button[mat-stroked-button]:active::after {
+  width: 220%;
+  height: 220%;
+  opacity: 1;
+}
+

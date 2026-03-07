@@ -1,0 +1,24 @@
+<mat-sidenav-container class="shell">
+  <mat-sidenav mode="side" opened>
+    <mat-toolbar color="primary">HRMS</mat-toolbar>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/employees" routerLinkActive="active">Employees</a>
+      <a mat-list-item routerLink="/departments" routerLinkActive="active">Departments</a>
+      <a mat-list-item routerLink="/leave" routerLinkActive="active">Leave</a>
+      <a mat-list-item routerLink="/attendance" routerLinkActive="active">Attendance</a>
+      <a mat-list-item routerLink="/payroll" routerLinkActive="active">Payroll</a>
+    </mat-nav-list>
+    <div class="spacer"></div>
+    <button mat-button color="warn" (click)="logout()">Logout</button>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <span>HR Management</span>
+    </mat-toolbar>
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
