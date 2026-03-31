@@ -1,92 +1,141 @@
-<mat-card>
-  <mat-card-title>Attendance</mat-card-title>
-  <mat-card-content>
-    <table mat-table [dataSource]="records" class="mat-elevation-z1">
-      <ng-container matColumnDef="employee">
-        <th mat-header-cell *matHeaderCellDef>Employee</th>
-        <td mat-cell *matCellDef="let r">{{ r.employeeName }}</td>
-      </ng-container>
+<div class="app-page">
+  <section class="kpi-grid">
+    <article class="metric-card">
+      <span class="metric-card__label">Present today</span>
+      <strong>{{ presentCount }}</strong>
+      <span>Present and half-day logs for today</span>
+    </article>
 
-      <ng-container matColumnDef="date">
-        <th mat-header-cell *matHeaderCellDef>Date</th>
-        <td mat-cell *matCellDef="let r">{{ r.workDate }}</td>
-      </ng-container>
+    <article class="metric-card">
+      <span class="metric-card__label">Late arrivals</span>
+      <strong>{{ lateCount }}</strong>
+      <span>Late attendance markers today</span>
+    </article>
 
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let r">{{ r.status }}</td>
-      </ng-container>
+    <article class="metric-card">
+      <span class="metric-card__label">Absent today</span>
+      <strong>{{ absentCount }}</strong>
+      <span>Explicit absences currently logged</span>
+    </article>
 
-      <ng-container matColumnDef="checkIn">
-        <th mat-header-cell *matHeaderCellDef>Check-in</th>
-        <td mat-cell *matCellDef="let r">{{ r.checkInTime }}</td>
-      </ng-container>
+    <article class="metric-card">
+      <span class="metric-card__label">Average check-in</span>
+      <strong>{{ averageCheckIn }}</strong>
+      <span>Average check-in time across today’s logs</span>
+    </article>
+  </section>
 
-      <ng-container matColumnDef="checkOut">
-        <th mat-header-cell *matHeaderCellDef>Check-out</th>
-        <td mat-cell *matCellDef="let r">{{ r.checkOutTime }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let r">
-          <button mat-button color="warn" (click)="delete(r)">Delete</button>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-  </mat-card-content>
-</mat-card>
-
-<mat-card class="form-card">
-  <mat-card-title>Record attendance</mat-card-title>
-  <mat-card-content>
-    <form [formGroup]="form" (ngSubmit)="save()">
-      <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Employee</mat-label>
-          <mat-select formControlName="employeeId">
-            <mat-option *ngFor="let e of employees" [value]="e.id">
-              {{ e.firstName }} {{ e.lastName }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="fill">
-          <mat-label>Date</mat-label>
-          <input matInput [matDatepicker]="datePicker" formControlName="workDate">
-          <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
-          <mat-datepicker #datePicker></mat-datepicker>
-        </mat-form-field>
+  <div class="section-grid">
+    <mat-card class="surface-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-header__eyebrow">Attendance book</p>
+          <h3>Daily records and exceptions</h3>
+        </div>
       </div>
 
-      <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Status</mat-label>
-          <mat-select formControlName="status">
-            <mat-option *ngFor="let s of statuses" [value]="s">
-              {{ s }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+      <div class="list-stack">
+        <div class="table-wrap" *ngIf="records.length; else attendanceEmpty">
+          <table mat-table [dataSource]="records">
+            <ng-container matColumnDef="employee">
+              <th mat-header-cell *matHeaderCellDef>Employee</th>
+              <td mat-cell *matCellDef="let record">{{ record.employeeName || 'Employee' }}</td>
+            </ng-container>
 
-        <mat-form-field appearance="fill">
-          <mat-label>Check-in (HH:MM)</mat-label>
-          <input matInput formControlName="checkInTime" placeholder="09:00">
-        </mat-form-field>
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let record">{{ record.workDate | date:'mediumDate' }}</td>
+            </ng-container>
 
-        <mat-form-field appearance="fill">
-          <mat-label>Check-out (HH:MM)</mat-label>
-          <input matInput formControlName="checkOutTime" placeholder="17:00">
-        </mat-form-field>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let record">
+                <span class="status-pill" [ngClass]="statusClass(record.status)">{{ record.status }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="checkIn">
+              <th mat-header-cell *matHeaderCellDef>Check in</th>
+              <td mat-cell *matCellDef="let record">{{ record.checkInTime || 'N/A' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="checkOut">
+              <th mat-header-cell *matHeaderCellDef>Check out</th>
+              <td mat-cell *matCellDef="let record">{{ record.checkOutTime || 'N/A' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let record">
+                <button mat-button color="warn" type="button" (click)="delete(record)">Delete</button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="surface-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-header__eyebrow">Attendance editor</p>
+          <h3>Record or correct a workday</h3>
+        </div>
       </div>
 
-      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
-        Save
-      </button>
-    </form>
-  </mat-card-content>
-</mat-card>
+      <div class="list-stack">
+        <form [formGroup]="form" class="form-grid" (ngSubmit)="save()">
+          <mat-form-field appearance="fill" class="full-span">
+            <mat-label>Employee</mat-label>
+            <mat-select formControlName="employeeId">
+              <mat-option *ngFor="let employee of employees" [value]="employee.id">
+                {{ employee.firstName }} {{ employee.lastName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
+          <mat-form-field appearance="fill">
+            <mat-label>Work date</mat-label>
+            <input matInput [matDatepicker]="attendancePicker" formControlName="workDate">
+            <mat-datepicker-toggle matSuffix [for]="attendancePicker"></mat-datepicker-toggle>
+            <mat-datepicker #attendancePicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option *ngFor="let status of statuses" [value]="status">
+                {{ status }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Check in</mat-label>
+            <input matInput type="time" formControlName="checkInTime">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Check out</mat-label>
+            <input matInput type="time" formControlName="checkOutTime">
+          </mat-form-field>
+
+          <div class="actions-row full-span">
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+              Save attendance
+            </button>
+          </div>
+        </form>
+      </div>
+    </mat-card>
+  </div>
+</div>
+
+<ng-template #attendanceEmpty>
+  <div class="empty-state empty-state--inline">
+    <p>No attendance records have been logged yet.</p>
+  </div>
+</ng-template>

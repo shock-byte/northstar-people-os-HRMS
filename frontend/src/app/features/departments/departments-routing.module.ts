@@ -5,7 +5,11 @@ import { DepartmentListComponent } from './department-list.component';
 const routes: Routes = [
   {
     path: '',
-    component: DepartmentListComponent
+    component: DepartmentListComponent,
+    data: {
+      title: 'Departments',
+      subtitle: 'Monitor org structure, department ownership, staffing density, and payroll distribution.'
+    }
   }
 ];
 
@@ -14,4 +18,3 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class DepartmentsRoutingModule {}
-

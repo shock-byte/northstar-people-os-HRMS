@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -26,6 +27,8 @@ public class PayrollService {
     @Transactional(readOnly = true)
     public List<PayrollRecordDto> findAll() {
         return payrollRecordRepository.findAll().stream()
+                .sorted(Comparator.comparing(PayrollRecord::getYear).reversed()
+                        .thenComparing(Comparator.comparing(PayrollRecord::getMonth).reversed()))
                 .map(PayrollRecordDto::fromEntity)
                 .toList();
     }
@@ -55,4 +58,3 @@ public class PayrollService {
         payrollRecordRepository.deleteById(id);
     }
 }
-

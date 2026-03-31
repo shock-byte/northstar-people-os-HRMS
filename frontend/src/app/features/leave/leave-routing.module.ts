@@ -5,7 +5,11 @@ import { LeaveListComponent } from './leave-list.component';
 const routes: Routes = [
   {
     path: '',
-    component: LeaveListComponent
+    component: LeaveListComponent,
+    data: {
+      title: 'Leave',
+      subtitle: 'Review upcoming time away, approve requests, and keep staffing plans ahead of schedule.'
+    }
   }
 ];
 
@@ -14,4 +18,3 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class LeaveRoutingModule {}
-

@@ -33,9 +33,10 @@ public class EmployeeController {
     public Page<EmployeeDto> getAll(
             @RequestParam Optional<Long> departmentId,
             @RequestParam Optional<Employee.EmploymentStatus> status,
+            @RequestParam Optional<String> query,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        return employeeService.findAll(departmentId, status, pageable);
+        return employeeService.findAll(departmentId, status, query, pageable);
     }
 
     @GetMapping("/{id}")
@@ -58,4 +59,3 @@ public class EmployeeController {
         employeeService.delete(id);
     }
 }
-

@@ -1,65 +1,128 @@
-<mat-card>
-  <mat-card-title>Departments</mat-card-title>
-  <mat-card-content>
-    <table mat-table [dataSource]="departments" class="mat-elevation-z1">
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>Name</th>
-        <td mat-cell *matCellDef="let d">{{ d.name }}</td>
-      </ng-container>
+<div class="app-page">
+  <section class="kpi-grid">
+    <article class="metric-card">
+      <span class="metric-card__label">Departments</span>
+      <strong>{{ departments.length }}</strong>
+      <span>{{ staffedDepartments }} currently staffed</span>
+    </article>
 
-      <ng-container matColumnDef="code">
-        <th mat-header-cell *matHeaderCellDef>Code</th>
-        <td mat-cell *matCellDef="let d">{{ d.code }}</td>
-      </ng-container>
+    <article class="metric-card">
+      <span class="metric-card__label">Managers assigned</span>
+      <strong>{{ managersAssigned }}</strong>
+      <span>Named leaders across the org chart</span>
+    </article>
 
-      <ng-container matColumnDef="managerName">
-        <th mat-header-cell *matHeaderCellDef>Manager</th>
-        <td mat-cell *matCellDef="let d">{{ d.managerName }}</td>
-      </ng-container>
+    <article class="metric-card">
+      <span class="metric-card__label">Average team size</span>
+      <strong>{{ averageTeamSize }}</strong>
+      <span>Employees per department on average</span>
+    </article>
 
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let d">
-          <button mat-button color="primary" (click)="startEdit(d)">Edit</button>
-          <button mat-button color="warn" (click)="delete(d)">Delete</button>
-        </td>
-      </ng-container>
+    <article class="metric-card">
+      <span class="metric-card__label">Visible payroll base</span>
+      <strong>{{ formatCurrency(totalPayroll) }}</strong>
+      <span>Monthly salary base across departments</span>
+    </article>
+  </section>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-  </mat-card-content>
-</mat-card>
+  <div class="section-grid">
+    <mat-card class="surface-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-header__eyebrow">Org structure</p>
+          <h3>Department coverage and ownership</h3>
+        </div>
+      </div>
 
-<mat-card class="form-card">
-  <mat-card-title>{{ editing ? 'Edit department' : 'Create department' }}</mat-card-title>
-  <mat-card-content>
-    <form [formGroup]="form" (ngSubmit)="save()">
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name">
-      </mat-form-field>
+      <div class="list-stack">
+        <div class="table-wrap" *ngIf="departments.length; else departmentsEmpty">
+          <table mat-table [dataSource]="departments">
+            <ng-container matColumnDef="department">
+              <th mat-header-cell *matHeaderCellDef>Department</th>
+              <td mat-cell *matCellDef="let department">
+                <div class="entity-primary">
+                  <strong>{{ department.name }}</strong>
+                  <span>{{ department.code }} • {{ department.description || 'Description not added yet' }}</span>
+                </div>
+              </td>
+            </ng-container>
 
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Code</mat-label>
-        <input matInput formControlName="code">
-      </mat-form-field>
+            <ng-container matColumnDef="manager">
+              <th mat-header-cell *matHeaderCellDef>Manager</th>
+              <td mat-cell *matCellDef="let department">{{ department.managerName || 'Unassigned' }}</td>
+            </ng-container>
 
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description"></textarea>
-      </mat-form-field>
+            <ng-container matColumnDef="headcount">
+              <th mat-header-cell *matHeaderCellDef>Headcount</th>
+              <td mat-cell *matCellDef="let department">{{ headcountFor(department) }}</td>
+            </ng-container>
 
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Manager</mat-label>
-        <input matInput formControlName="managerName">
-      </mat-form-field>
+            <ng-container matColumnDef="payroll">
+              <th mat-header-cell *matHeaderCellDef>Monthly payroll</th>
+              <td mat-cell *matCellDef="let department">{{ formatCurrency(payrollFor(department)) }}</td>
+            </ng-container>
 
-      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
-        {{ editing ? 'Update' : 'Create' }}
-      </button>
-      <button mat-button type="button" (click)="startCreate()">Clear</button>
-    </form>
-  </mat-card-content>
-</mat-card>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let department">
+                <div class="actions-row actions-row--inline">
+                  <button mat-button color="primary" type="button" (click)="startEdit(department)">Edit</button>
+                  <button mat-button color="warn" type="button" (click)="delete(department)">Delete</button>
+                </div>
+              </td>
+            </ng-container>
 
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="surface-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-header__eyebrow">Department editor</p>
+          <h3>{{ editing ? 'Update department' : 'Create department' }}</h3>
+        </div>
+      </div>
+
+      <div class="list-stack">
+        <form [formGroup]="form" class="form-grid" (ngSubmit)="save()">
+          <mat-form-field appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Code</mat-label>
+            <input matInput formControlName="code">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="full-span">
+            <mat-label>Description</mat-label>
+            <input matInput formControlName="description">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="full-span">
+            <mat-label>Manager name</mat-label>
+            <input matInput formControlName="managerName">
+          </mat-form-field>
+
+          <div class="actions-row full-span">
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+              {{ editing ? 'Save changes' : 'Create department' }}
+            </button>
+            <button mat-button type="button" (click)="startCreate()">Reset form</button>
+          </div>
+        </form>
+      </div>
+    </mat-card>
+  </div>
+</div>
+
+<ng-template #departmentsEmpty>
+  <div class="empty-state empty-state--inline">
+    <p>No departments have been created yet.</p>
+  </div>
+</ng-template>

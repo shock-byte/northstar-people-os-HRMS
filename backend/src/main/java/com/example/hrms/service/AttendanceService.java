@@ -6,10 +6,12 @@ import com.example.hrms.model.Employee;
 import com.example.hrms.repository.AttendanceRecordRepository;
 import com.example.hrms.repository.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -28,6 +30,7 @@ public class AttendanceService {
     public List<AttendanceRecordDto> findAll() {
         return attendanceRecordRepository.findAll()
                 .stream()
+                .sorted(Comparator.comparing(AttendanceRecord::getWorkDate).reversed())
                 .map(AttendanceRecordDto::fromEntity)
                 .toList();
     }
@@ -40,6 +43,7 @@ public class AttendanceService {
     }
 
     public AttendanceRecordDto createOrUpdateForDay(AttendanceRecordDto request) {
+        validateAttendance(request);
         Employee employee = employeeRepository.findById(request.getEmployeeId())
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + request.getEmployeeId()));
         LocalDate date = request.getWorkDate();
@@ -57,5 +61,11 @@ public class AttendanceService {
         }
         attendanceRecordRepository.deleteById(id);
     }
-}
 
+    private void validateAttendance(AttendanceRecordDto request) {
+        if (request.getCheckInTime() != null && request.getCheckOutTime() != null
+                && request.getCheckOutTime().isBefore(request.getCheckInTime())) {
+            throw new ValidationException("Check-out time cannot be before check-in time");
+        }
+    }
+}

@@ -1,24 +1,56 @@
 <mat-sidenav-container class="shell">
-  <mat-sidenav mode="side" opened>
-    <mat-toolbar color="primary">HRMS</mat-toolbar>
-    <mat-nav-list>
-      <a mat-list-item routerLink="/employees" routerLinkActive="active">Employees</a>
-      <a mat-list-item routerLink="/departments" routerLinkActive="active">Departments</a>
-      <a mat-list-item routerLink="/leave" routerLinkActive="active">Leave</a>
-      <a mat-list-item routerLink="/attendance" routerLinkActive="active">Attendance</a>
-      <a mat-list-item routerLink="/payroll" routerLinkActive="active">Payroll</a>
-    </mat-nav-list>
-    <div class="spacer"></div>
-    <button mat-button color="warn" (click)="logout()">Logout</button>
+  <mat-sidenav #drawer class="shell-nav" [mode]="isMobile ? 'over' : 'side'" [opened]="!isMobile">
+    <div class="brand-block">
+      <p class="brand-block__eyebrow">Northstar</p>
+      <h2>People OS</h2>
+      <p>Purpose-built HR workspace for workforce planning, leave, attendance, and payroll.</p>
+    </div>
+
+    <div class="nav-list">
+      <a
+        *ngFor="let item of navItems"
+        class="nav-link"
+        routerLinkActive="nav-link--active"
+        [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+        [routerLink]="item.route"
+        (click)="isMobile ? drawer.close() : null"
+      >
+        <span class="nav-link__label">{{ item.label }}</span>
+        <span class="nav-link__description">{{ item.description }}</span>
+      </a>
+    </div>
+
+    <div class="nav-footer">
+      <div class="profile-card">
+        <div class="profile-card__avatar">{{ initials }}</div>
+        <div>
+          <strong>{{ session?.displayName || 'HR Team' }}</strong>
+          <span>{{ roleLabel }}</span>
+        </div>
+      </div>
+      <button mat-stroked-button type="button" (click)="logout()">Logout</button>
+    </div>
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <mat-toolbar color="primary">
-      <span>HR Management</span>
-    </mat-toolbar>
-    <main class="content">
+    <header class="content-header">
+      <div>
+        <p class="content-header__eyebrow">{{ todayLabel }}</p>
+        <h1>{{ pageTitle }}</h1>
+        <p>{{ pageSubtitle }}</p>
+      </div>
+
+      <div class="content-header__actions">
+        <button mat-stroked-button type="button" *ngIf="isMobile" (click)="drawer.toggle()">Menu</button>
+        <div class="header-chip">
+          <span class="header-chip__label">Signed in as</span>
+          <strong>{{ session?.displayName || 'HR Team' }}</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-area">
       <router-outlet></router-outlet>
     </main>
   </mat-sidenav-content>
 </mat-sidenav-container>
-

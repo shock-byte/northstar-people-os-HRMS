@@ -12,13 +12,16 @@ export class EmployeeApiService {
 
   constructor(private readonly http: HttpClient) {}
 
-  list(options?: { departmentId?: number; status?: EmploymentStatus; page?: number; size?: number }): Observable<Page<Employee>> {
+  list(options?: { departmentId?: number; status?: EmploymentStatus; query?: string; page?: number; size?: number }): Observable<Page<Employee>> {
     let params = new HttpParams();
     if (options?.departmentId != null) {
       params = params.set('departmentId', options.departmentId);
     }
     if (options?.status != null) {
       params = params.set('status', options.status);
+    }
+    if (options?.query) {
+      params = params.set('query', options.query);
     }
     if (options?.page != null) {
       params = params.set('page', options.page);
@@ -45,4 +48,3 @@ export class EmployeeApiService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }
-

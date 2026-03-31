@@ -7,13 +7,22 @@ import { AuthGuard } from './auth/auth.guard';
 const routes: Routes = [
   {
     path: 'login',
-    component: LoginComponent
+    component: LoginComponent,
+    data: {
+      title: 'Sign In',
+      subtitle: 'Authenticate against the backend and open the HR workspace.'
+    }
   },
   {
     path: '',
     component: MainLayoutComponent,
     canActivate: [AuthGuard],
     children: [
+      {
+        path: 'dashboard',
+        loadChildren: () =>
+          import('./features/dashboard/dashboard.module').then(m => m.DashboardModule)
+      },
       {
         path: 'employees',
         loadChildren: () =>
@@ -42,7 +51,7 @@ const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'employees'
+        redirectTo: 'dashboard'
       }
     ]
   },
@@ -57,4 +66,3 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule {}
-

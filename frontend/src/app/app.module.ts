@@ -13,6 +13,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { LayoutModule } from '@angular/cdk/layout';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -43,6 +44,7 @@ import { AuthInterceptor } from './auth/auth.interceptor';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
+    LayoutModule,
     AppRoutingModule
   ],
   providers: [
@@ -57,4 +59,3 @@ import { AuthInterceptor } from './auth/auth.interceptor';
   bootstrap: [AppComponent]
 })
 export class AppModule {}
-

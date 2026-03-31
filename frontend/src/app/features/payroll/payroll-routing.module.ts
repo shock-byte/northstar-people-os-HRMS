@@ -5,7 +5,11 @@ import { PayrollListComponent } from './payroll-list.component';
 const routes: Routes = [
   {
     path: '',
-    component: PayrollListComponent
+    component: PayrollListComponent,
+    data: {
+      title: 'Payroll',
+      subtitle: 'Run compensation cycles, monitor coverage, and validate net pay before every payout window.'
+    }
   }
 ];
 
@@ -14,4 +18,3 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class PayrollRoutingModule {}
-

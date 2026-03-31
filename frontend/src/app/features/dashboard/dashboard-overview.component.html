@@ -1,0 +1,177 @@
+<div class="app-page" *ngIf="overview as data; else dashboardState">
+  <section class="page-hero">
+    <div>
+      <p class="page-hero__eyebrow">People operations command center</p>
+      <h2>See what needs attention before it becomes a fire drill.</h2>
+      <p>
+        Northstar People OS combines workforce signals, approval queues, attendance coverage,
+        and payroll completion so HR, finance, and operations can act from one place.
+      </p>
+    </div>
+
+    <div class="page-hero__actions">
+      <a mat-stroked-button routerLink="/employees">Manage workforce</a>
+      <a mat-raised-button color="primary" routerLink="/leave">Review leave queue</a>
+    </div>
+  </section>
+
+  <section class="kpi-grid">
+    <article class="metric-card">
+      <span class="metric-card__label">Active employees</span>
+      <strong>{{ data.summary.activeEmployees }}</strong>
+      <span>{{ data.summary.totalEmployees }} total in the organization</span>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">Attendance completion</span>
+      <strong>{{ formatPercent(data.attendance.completionRate) }}</strong>
+      <span>{{ data.attendance.loggedEmployees }} of {{ data.attendance.expectedEmployees }} logged today</span>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">Pending approvals</span>
+      <strong>{{ data.leave.pendingRequests }}</strong>
+      <span>{{ data.leave.employeesOnLeaveToday }} employees currently on approved leave</span>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">Current payroll</span>
+      <strong>{{ formatCurrency(data.payroll.totalNetPay) }}</strong>
+      <span>{{ formatPercent(data.payroll.coverageRate) }} coverage for {{ monthLabel(data.payroll.year, data.payroll.month) }}</span>
+    </article>
+  </section>
+
+  <section class="section-grid section-grid--dashboard">
+    <mat-card class="surface-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-header__eyebrow">Action queue</p>
+          <h3>What the team should work on next</h3>
+        </div>
+      </div>
+
+      <div class="list-stack" *ngIf="data.actionItems.length; else emptyQueue">
+        <a class="queue-item" *ngFor="let item of data.actionItems" [routerLink]="item.route">
+          <span class="status-pill" [ngClass]="'status-pill--' + item.severity">{{ item.severity }}</span>
+          <div>
+            <strong>{{ item.title }}</strong>
+            <p>{{ item.detail }}</p>
+          </div>
+        </a>
+      </div>
+    </mat-card>
+
+    <mat-card class="surface-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-header__eyebrow">Attendance today</p>
+          <h3>Workday snapshot</h3>
+        </div>
+      </div>
+
+      <div class="list-stack">
+        <div class="mini-stats">
+          <div>
+            <strong>{{ data.attendance.present }}</strong>
+            <span>Present / half day</span>
+          </div>
+          <div>
+            <strong>{{ data.attendance.late }}</strong>
+            <span>Late check-ins</span>
+          </div>
+          <div>
+            <strong>{{ data.attendance.absent }}</strong>
+            <span>Absent or missing logs</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress-rail">
+        <span [style.width.%]="data.attendance.completionRate"></span>
+      </div>
+      <div class="list-stack">
+        <p class="panel-caption">
+          Attendance book captured for {{ data.attendance.loggedEmployees }} employees on {{ data.attendance.workDate | date:'mediumDate' }}.
+        </p>
+      </div>
+    </mat-card>
+  </section>
+
+  <section class="section-grid">
+    <mat-card class="surface-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-header__eyebrow">Department capacity</p>
+          <h3>Headcount and payroll by team</h3>
+        </div>
+      </div>
+
+      <div class="list-stack">
+        <article class="department-item" *ngFor="let department of data.departmentBreakdown">
+          <div class="department-item__top">
+            <div>
+              <strong>{{ department.name }}</strong>
+              <span>{{ department.code }} • {{ department.managerName || 'Manager unassigned' }}</span>
+            </div>
+            <span>{{ department.headcount }} people</span>
+          </div>
+
+          <div class="progress-rail progress-rail--soft">
+            <span [style.width.%]="departmentShare(department.headcount)"></span>
+          </div>
+
+          <div class="department-item__meta">
+            <span>{{ department.activeHeadcount }} active</span>
+            <span>{{ department.pendingLeaveRequests }} pending leave</span>
+            <span>{{ formatCurrency(department.monthlyPayroll) }} payroll</span>
+          </div>
+        </article>
+      </div>
+    </mat-card>
+
+    <mat-card class="surface-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-header__eyebrow">People milestones</p>
+          <h3>Upcoming anniversaries</h3>
+        </div>
+      </div>
+
+      <div class="list-stack" *ngIf="data.milestones.length; else emptyMilestones">
+        <a class="milestone-item" *ngFor="let milestone of data.milestones" [routerLink]="milestone.route">
+          <div>
+            <strong>{{ milestone.title }}</strong>
+            <p>{{ milestone.detail }}</p>
+          </div>
+          <span>{{ milestone.date | date:'MMM d' }}</span>
+        </a>
+      </div>
+    </mat-card>
+  </section>
+</div>
+
+<ng-template #dashboardState>
+  <div class="app-page">
+    <mat-card class="surface-card empty-state">
+      <h3>{{ isLoading ? 'Loading HR workspace...' : 'Dashboard unavailable' }}</h3>
+      <p>
+        {{ isLoading
+          ? 'Fetching live workforce data, approvals, attendance, and payroll insights.'
+          : 'The dashboard could not be loaded. Check that the backend is running and reachable from the Angular app.' }}
+      </p>
+      <button mat-stroked-button type="button" (click)="load()">Retry</button>
+    </mat-card>
+  </div>
+</ng-template>
+
+<ng-template #emptyQueue>
+  <div class="empty-state empty-state--inline">
+    <p>No urgent queue items right now. The operations team is caught up.</p>
+  </div>
+</ng-template>
+
+<ng-template #emptyMilestones>
+  <div class="empty-state empty-state--inline">
+    <p>No upcoming work anniversaries in the next 60 days.</p>
+  </div>
+</ng-template>

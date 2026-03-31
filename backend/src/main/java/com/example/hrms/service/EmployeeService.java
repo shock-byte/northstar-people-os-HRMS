@@ -6,12 +6,15 @@ import com.example.hrms.model.Employee;
 import com.example.hrms.repository.DepartmentRepository;
 import com.example.hrms.repository.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Comparator;
 
 @Service
 @Transactional
@@ -28,16 +31,29 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public Page<EmployeeDto> findAll(Optional<Long> departmentId,
                                      Optional<Employee.EmploymentStatus> status,
+                                     Optional<String> query,
                                      Pageable pageable) {
-        Page<Employee> page;
-        if (departmentId.isPresent()) {
-            page = employeeRepository.findByDepartment_Id(departmentId.get(), pageable);
-        } else if (status.isPresent()) {
-            page = employeeRepository.findByStatus(status.get(), pageable);
-        } else {
-            page = employeeRepository.findAll(pageable);
-        }
-        return page.map(EmployeeDto::fromEntity);
+        var filtered = employeeRepository.findAll().stream()
+                .filter(employee -> departmentId
+                        .map(id -> employee.getDepartment() != null && id.equals(employee.getDepartment().getId()))
+                        .orElse(true))
+                .filter(employee -> status.map(value -> employee.getStatus() == value).orElse(true))
+                .filter(employee -> query
+                        .map(term -> matchesSearch(employee, term))
+                        .orElse(true))
+                .sorted(Comparator.comparing(Employee::getLastName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(Employee::getFirstName, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filtered.size());
+        var pageContent = start >= filtered.size() ? java.util.List.<Employee>of() : filtered.subList(start, end);
+
+        return new PageImpl<>(
+                pageContent.stream().map(EmployeeDto::fromEntity).toList(),
+                pageable,
+                filtered.size()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -48,6 +64,7 @@ public class EmployeeService {
     }
 
     public EmployeeDto create(EmployeeDto request) {
+        validateEmailUniqueness(request.getEmail(), null);
         Department department = null;
         if (request.getDepartmentId() != null) {
             department = departmentRepository.findById(request.getDepartmentId())
@@ -62,6 +79,7 @@ public class EmployeeService {
     public EmployeeDto update(Long id, EmployeeDto request) {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found: " + id));
+        validateEmailUniqueness(request.getEmail(), id);
         Department department = null;
         if (request.getDepartmentId() != null) {
             department = departmentRepository.findById(request.getDepartmentId())
@@ -80,5 +98,29 @@ public class EmployeeService {
         }
         employeeRepository.deleteById(id);
     }
-}
 
+    private void validateEmailUniqueness(String email, Long currentId) {
+        employeeRepository.findByEmail(email)
+                .filter(existing -> !existing.getId().equals(currentId))
+                .ifPresent(existing -> {
+                    throw new ValidationException("Employee email already exists: " + email);
+                });
+    }
+
+    private boolean matchesSearch(Employee employee, String rawSearchTerm) {
+        String term = rawSearchTerm == null ? "" : rawSearchTerm.trim().toLowerCase();
+        if (term.isEmpty()) {
+            return true;
+        }
+
+        return contains(employee.getFirstName(), term)
+                || contains(employee.getLastName(), term)
+                || contains(employee.getEmail(), term)
+                || contains(employee.getJobTitle(), term)
+                || contains(employee.getDepartment() != null ? employee.getDepartment().getName() : null, term);
+    }
+
+    private boolean contains(String value, String term) {
+        return value != null && value.toLowerCase().contains(term);
+    }
+}

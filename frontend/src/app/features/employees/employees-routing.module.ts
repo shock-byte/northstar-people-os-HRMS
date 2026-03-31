@@ -5,7 +5,11 @@ import { EmployeeListComponent } from './employee-list.component';
 const routes: Routes = [
   {
     path: '',
-    component: EmployeeListComponent
+    component: EmployeeListComponent,
+    data: {
+      title: 'Employees',
+      subtitle: 'Manage the people directory, assignments, employment status, and compensation bands.'
+    }
   }
 ];
 
@@ -14,4 +18,3 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class EmployeesRoutingModule {}
-

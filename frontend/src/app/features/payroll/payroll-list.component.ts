@@ -38,13 +38,31 @@ export class PayrollListComponent implements OnInit {
 
   ngOnInit(): void {
     this.employeeApi
-      .list({ page: 0, size: 200 })
+      .list({ page: 0, size: 300 })
       .subscribe(page => (this.employees = page.content));
     this.load();
   }
 
   load(): void {
-    this.payrollApi.list().subscribe(r => (this.records = r));
+    this.payrollApi.list().subscribe(records => {
+      this.records = [...records].sort((left, right) => {
+        if (left.year !== right.year) {
+          return right.year - left.year;
+        }
+        return right.month - left.month;
+      });
+    });
+  }
+
+  syncBaseSalary(): void {
+    const employeeId = this.form.get('employeeId')?.value as number | null;
+    const employee = this.employees.find(candidate => candidate.id === employeeId);
+    if (!employee) {
+      return;
+    }
+    this.form.patchValue({
+      baseSalary: employee.monthlySalary ?? this.form.get('baseSalary')?.value
+    });
   }
 
   save(): void {
@@ -54,7 +72,7 @@ export class PayrollListComponent implements OnInit {
     const payload: PayrollRecord = this.form.value;
     this.payrollApi.createOrUpdate(payload).subscribe({
       next: () => {
-        this.snackBar.open('Payroll saved', 'Close', { duration: 2000 });
+        this.snackBar.open('Payroll saved', 'Close', { duration: 2500 });
         this.load();
       }
     });
@@ -69,10 +87,42 @@ export class PayrollListComponent implements OnInit {
     }
     this.payrollApi.delete(record.id).subscribe({
       next: () => {
-        this.snackBar.open('Payroll deleted', 'Close', { duration: 2000 });
+        this.snackBar.open('Payroll deleted', 'Close', { duration: 2500 });
         this.load();
       }
     });
   }
-}
 
+  get currentMonthRecords(): PayrollRecord[] {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    return this.records.filter(record => record.year === currentYear && record.month === currentMonth);
+  }
+
+  get processedCount(): number {
+    return this.currentMonthRecords.length;
+  }
+
+  get totalNetPay(): number {
+    return this.currentMonthRecords.reduce((sum, record) => sum + (record.netPay ?? 0), 0);
+  }
+
+  get totalDeductions(): number {
+    return this.currentMonthRecords.reduce((sum, record) => sum + (record.deductions ?? 0), 0);
+  }
+
+  get averageNetPay(): number {
+    return this.currentMonthRecords.length
+      ? this.totalNetPay / this.currentMonthRecords.length
+      : 0;
+  }
+
+  formatCurrency(value?: number): string {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(value ?? 0);
+  }
+}

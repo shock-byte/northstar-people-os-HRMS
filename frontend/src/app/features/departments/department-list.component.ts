@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { forkJoin } from 'rxjs';
 import { Department } from '../../core/models/department.model';
+import { Employee } from '../../core/models/employee.model';
 import { DepartmentApiService } from '../../core/services/department-api.service';
+import { EmployeeApiService } from '../../core/services/employee-api.service';
 
 @Component({
   selector: 'app-department-list',
@@ -11,13 +14,15 @@ import { DepartmentApiService } from '../../core/services/department-api.service
 })
 export class DepartmentListComponent implements OnInit {
 
-  displayedColumns = ['name', 'code', 'managerName', 'actions'];
+  displayedColumns = ['department', 'manager', 'headcount', 'payroll', 'actions'];
   departments: Department[] = [];
+  employees: Employee[] = [];
   form: FormGroup;
   editing: Department | null = null;
 
   constructor(
     private readonly departmentApi: DepartmentApiService,
+    private readonly employeeApi: EmployeeApiService,
     private readonly fb: FormBuilder,
     private readonly snackBar: MatSnackBar
   ) {
@@ -30,12 +35,17 @@ export class DepartmentListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.startCreate();
     this.load();
   }
 
   load(): void {
-    this.departmentApi.list().subscribe(depts => {
-      this.departments = depts;
+    forkJoin({
+      departments: this.departmentApi.list(),
+      employees: this.employeeApi.list({ page: 0, size: 300 })
+    }).subscribe(({ departments, employees }) => {
+      this.departments = departments;
+      this.employees = employees.content;
     });
   }
 
@@ -44,9 +54,9 @@ export class DepartmentListComponent implements OnInit {
     this.form.reset();
   }
 
-  startEdit(dept: Department): void {
-    this.editing = dept;
-    this.form.reset(dept);
+  startEdit(department: Department): void {
+    this.editing = department;
+    this.form.reset(department);
   }
 
   save(): void {
@@ -54,39 +64,70 @@ export class DepartmentListComponent implements OnInit {
       return;
     }
     const value = this.form.value as Department;
-    if (this.editing && this.editing.id != null) {
-      this.departmentApi.update(this.editing.id, { ...this.editing, ...value }).subscribe({
-        next: () => {
-          this.snackBar.open('Department updated', 'Close', { duration: 2000 });
-          this.load();
-          this.editing = null;
-          this.form.reset();
-        }
-      });
-    } else {
-      this.departmentApi.create(value).subscribe({
-        next: () => {
-          this.snackBar.open('Department created', 'Close', { duration: 2000 });
-          this.load();
-          this.form.reset();
-        }
-      });
-    }
+    const request = this.editing?.id
+      ? this.departmentApi.update(this.editing.id, { ...this.editing, ...value })
+      : this.departmentApi.create(value);
+
+    request.subscribe({
+      next: () => {
+        this.snackBar.open(this.editing ? 'Department updated' : 'Department created', 'Close', {
+          duration: 2500
+        });
+        this.load();
+        this.startCreate();
+      }
+    });
   }
 
-  delete(dept: Department): void {
-    if (!dept.id) {
+  delete(department: Department): void {
+    if (!department.id) {
       return;
     }
-    if (!confirm(`Delete department "${dept.name}"?`)) {
+    if (!confirm(`Delete department "${department.name}"?`)) {
       return;
     }
-    this.departmentApi.delete(dept.id).subscribe({
+    this.departmentApi.delete(department.id).subscribe({
       next: () => {
-        this.snackBar.open('Department deleted', 'Close', { duration: 2000 });
+        this.snackBar.open('Department deleted', 'Close', { duration: 2500 });
         this.load();
       }
     });
   }
-}
 
+  get staffedDepartments(): number {
+    return this.departments.filter(department => this.headcountFor(department) > 0).length;
+  }
+
+  get managersAssigned(): number {
+    return this.departments.filter(department => !!department.managerName).length;
+  }
+
+  get averageTeamSize(): number {
+    if (!this.departments.length) {
+      return 0;
+    }
+    return Math.round(this.employees.length / this.departments.length);
+  }
+
+  get totalPayroll(): number {
+    return this.employees.reduce((sum, employee) => sum + (employee.monthlySalary ?? 0), 0);
+  }
+
+  headcountFor(department: Department): number {
+    return this.employees.filter(employee => employee.departmentId === department.id).length;
+  }
+
+  payrollFor(department: Department): number {
+    return this.employees
+      .filter(employee => employee.departmentId === department.id)
+      .reduce((sum, employee) => sum + (employee.monthlySalary ?? 0), 0);
+  }
+
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(value ?? 0);
+  }
+}

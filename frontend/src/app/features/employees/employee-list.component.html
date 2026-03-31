@@ -1,141 +1,206 @@
-<mat-card>
-  <mat-card-title>Employees</mat-card-title>
-  <mat-card-content>
-    <form [formGroup]="filterForm" class="filters" (ngSubmit)="applyFilters()">
-      <mat-form-field appearance="fill">
-        <mat-label>Department</mat-label>
-        <mat-select formControlName="departmentId">
-          <mat-option [value]="null">All</mat-option>
-          <mat-option *ngFor="let d of departments" [value]="d.id">
-            {{ d.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+<div class="app-page">
+  <section class="kpi-grid">
+    <article class="metric-card">
+      <span class="metric-card__label">Visible employees</span>
+      <strong>{{ total }}</strong>
+      <span>{{ activeCount }} currently active</span>
+    </article>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Status</mat-label>
-        <mat-select formControlName="status">
-          <mat-option [value]="null">All</mat-option>
-          <mat-option *ngFor="let s of statuses" [value]="s">
-            {{ s }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+    <article class="metric-card">
+      <span class="metric-card__label">New hires</span>
+      <strong>{{ newHiresCount }}</strong>
+      <span>Joined in the last 90 days</span>
+    </article>
 
-      <button mat-stroked-button color="primary" type="submit">Apply</button>
-      <button mat-button type="button" (click)="clearFilters()">Clear</button>
-    </form>
+    <article class="metric-card">
+      <span class="metric-card__label">Inactive records</span>
+      <strong>{{ inactiveCount }}</strong>
+      <span>Employees not currently active</span>
+    </article>
 
-    <table mat-table [dataSource]="data" class="mat-elevation-z1">
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>Name</th>
-        <td mat-cell *matCellDef="let e">{{ e.firstName }} {{ e.lastName }}</td>
-      </ng-container>
+    <article class="metric-card">
+      <span class="metric-card__label">Monthly salary base</span>
+      <strong>{{ formatCurrency(monthlyPayroll) }}</strong>
+      <span>Visible workforce cost before allowances</span>
+    </article>
+  </section>
 
-      <ng-container matColumnDef="email">
-        <th mat-header-cell *matHeaderCellDef>Email</th>
-        <td mat-cell *matCellDef="let e">{{ e.email }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="department">
-        <th mat-header-cell *matHeaderCellDef>Department</th>
-        <td mat-cell *matCellDef="let e">{{ e.departmentName }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let e">{{ e.status }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let e">
-          <button mat-button color="primary" (click)="startEdit(e)">Edit</button>
-          <button mat-button color="warn" (click)="delete(e)">Delete</button>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-  </mat-card-content>
-</mat-card>
-
-<mat-card class="form-card">
-  <mat-card-title>{{ editing ? 'Edit employee' : 'Create employee' }}</mat-card-title>
-  <mat-card-content>
-    <form [formGroup]="form" (ngSubmit)="save()">
-      <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>First name</mat-label>
-          <input matInput formControlName="firstName">
-        </mat-form-field>
-
-        <mat-form-field appearance="fill">
-          <mat-label>Last name</mat-label>
-          <input matInput formControlName="lastName">
-        </mat-form-field>
+  <div class="section-grid">
+    <mat-card class="surface-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-header__eyebrow">People directory</p>
+          <h3>Search and monitor the workforce</h3>
+        </div>
       </div>
 
-      <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email">
-        </mat-form-field>
+      <div class="list-stack">
+        <form [formGroup]="filterForm" class="toolbar-grid toolbar-grid--compact" (ngSubmit)="applyFilters()">
+          <mat-form-field appearance="fill">
+            <mat-label>Search people or roles</mat-label>
+            <input matInput formControlName="query" placeholder="Name, email, role, or department">
+          </mat-form-field>
 
-        <mat-form-field appearance="fill">
-          <mat-label>Phone</mat-label>
-          <input matInput formControlName="phone">
-        </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Department</mat-label>
+            <mat-select formControlName="departmentId">
+              <mat-option [value]="null">All departments</mat-option>
+              <mat-option *ngFor="let department of departments" [value]="department.id">
+                {{ department.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option [value]="null">All statuses</mat-option>
+              <mat-option *ngFor="let status of statuses" [value]="status">
+                {{ status }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-stroked-button color="primary" type="submit">Apply</button>
+          <button mat-button type="button" (click)="clearFilters()">Clear</button>
+        </form>
+
+        <div class="table-wrap" *ngIf="data.length; else employeesEmpty">
+          <table mat-table [dataSource]="data">
+            <ng-container matColumnDef="person">
+              <th mat-header-cell *matHeaderCellDef>Person</th>
+              <td mat-cell *matCellDef="let employee">
+                <div class="entity-primary">
+                  <strong>{{ employee.firstName }} {{ employee.lastName }}</strong>
+                  <span>{{ employee.email }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="jobTitle">
+              <th mat-header-cell *matHeaderCellDef>Role</th>
+              <td mat-cell *matCellDef="let employee">
+                <div class="entity-primary">
+                  <strong>{{ employee.jobTitle || 'Role not set' }}</strong>
+                  <span>Hired {{ employee.hireDate | date:'mediumDate' }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="department">
+              <th mat-header-cell *matHeaderCellDef>Department</th>
+              <td mat-cell *matCellDef="let employee">{{ employee.departmentName || 'Unassigned' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="salary">
+              <th mat-header-cell *matHeaderCellDef>Monthly salary</th>
+              <td mat-cell *matCellDef="let employee">{{ formatCurrency(employee.monthlySalary) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let employee">
+                <span class="status-pill" [ngClass]="statusClass(employee.status)">{{ employee.status }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let employee">
+                <div class="actions-row actions-row--inline">
+                  <button mat-button color="primary" type="button" (click)="startEdit(employee)">Edit</button>
+                  <button mat-button color="warn" type="button" (click)="delete(employee)">Delete</button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="surface-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-header__eyebrow">Employee editor</p>
+          <h3>{{ editing ? 'Update employee profile' : 'Create employee record' }}</h3>
+        </div>
       </div>
 
-      <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Hire date</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="hireDate">
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
+      <div class="list-stack">
+        <form [formGroup]="form" class="form-grid" (ngSubmit)="save()">
+          <mat-form-field appearance="fill">
+            <mat-label>First name</mat-label>
+            <input matInput formControlName="firstName">
+          </mat-form-field>
 
-        <mat-form-field appearance="fill">
-          <mat-label>Job title</mat-label>
-          <input matInput formControlName="jobTitle">
-        </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Last name</mat-label>
+            <input matInput formControlName="lastName">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phone">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Hire date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="hireDate">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Job title</mat-label>
+            <input matInput formControlName="jobTitle">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option *ngFor="let status of statuses" [value]="status">
+                {{ status }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Department</mat-label>
+            <mat-select formControlName="departmentId">
+              <mat-option [value]="null">Unassigned</mat-option>
+              <mat-option *ngFor="let department of departments" [value]="department.id">
+                {{ department.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="full-span">
+            <mat-label>Monthly salary</mat-label>
+            <input matInput type="number" formControlName="monthlySalary">
+          </mat-form-field>
+
+          <div class="actions-row full-span">
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+              {{ editing ? 'Save changes' : 'Create employee' }}
+            </button>
+            <button mat-button type="button" (click)="startCreate()">Reset form</button>
+          </div>
+        </form>
       </div>
+    </mat-card>
+  </div>
+</div>
 
-      <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Status</mat-label>
-          <mat-select formControlName="status">
-            <mat-option *ngFor="let s of statuses" [value]="s">
-              {{ s }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="fill">
-          <mat-label>Department</mat-label>
-          <mat-select formControlName="departmentId">
-            <mat-option [value]="null">None</mat-option>
-            <mat-option *ngFor="let d of departments" [value]="d.id">
-              {{ d.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>Monthly salary</mat-label>
-          <input matInput type="number" formControlName="monthlySalary">
-        </mat-form-field>
-      </div>
-
-      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
-        {{ editing ? 'Update' : 'Create' }}
-      </button>
-      <button mat-button type="button" (click)="startCreate()">Clear</button>
-    </form>
-  </mat-card-content>
-</mat-card>
-
+<ng-template #employeesEmpty>
+  <div class="empty-state empty-state--inline">
+    <p>No employees match the current filters yet.</p>
+  </div>
+</ng-template>

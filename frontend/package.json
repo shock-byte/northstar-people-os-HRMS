@@ -1,5 +1,5 @@
 {
-  "name": "hrms-frontend",
+  "name": "northstar-people-os-web",
   "version": "0.0.1",
   "scripts": {
     "ng": "ng",
@@ -38,4 +38,3 @@
     "typescript": "~5.4.0"
   }
 }
-

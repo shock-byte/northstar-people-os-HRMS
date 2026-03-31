@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Comparator;
 
 @Service
 @Transactional
@@ -26,8 +27,8 @@ public class LeaveService {
 
     @Transactional(readOnly = true)
     public List<LeaveRequestDto> findAll() {
-        return leaveRequestRepository.findAll()
-                .stream()
+        return leaveRequestRepository.findAll().stream()
+                .sorted(Comparator.comparing(LeaveRequest::getStartDate).reversed())
                 .map(LeaveRequestDto::fromEntity)
                 .toList();
     }
@@ -63,6 +64,9 @@ public class LeaveService {
     public LeaveRequestDto changeStatus(Long id, LeaveRequest.LeaveStatus status, String approverName) {
         LeaveRequest leaveRequest = leaveRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Leave request not found: " + id));
+        if (leaveRequest.getStatus() == LeaveRequest.LeaveStatus.CANCELLED && status != LeaveRequest.LeaveStatus.CANCELLED) {
+            throw new ValidationException("Cancelled leave requests cannot be reopened");
+        }
         leaveRequest.setStatus(status);
         leaveRequest.setApproverName(approverName);
         LeaveRequest saved = leaveRequestRepository.save(leaveRequest);
@@ -93,4 +97,3 @@ public class LeaveService {
         }
     }
 }
-

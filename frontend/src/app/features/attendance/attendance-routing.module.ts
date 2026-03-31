@@ -5,7 +5,11 @@ import { AttendanceListComponent } from './attendance-list.component';
 const routes: Routes = [
   {
     path: '',
-    component: AttendanceListComponent
+    component: AttendanceListComponent,
+    data: {
+      title: 'Attendance',
+      subtitle: 'Capture daily work logs, watch punctuality, and resolve attendance exceptions quickly.'
+    }
   }
 ];
 
@@ -14,4 +18,3 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AttendanceRoutingModule {}
-

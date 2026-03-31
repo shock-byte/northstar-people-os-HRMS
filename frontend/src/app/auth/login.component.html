@@ -2,31 +2,58 @@
   <div class="login-glow"></div>
 
   <div class="login-wrapper">
-    <div class="login-visual">
-      <div class="login-avatar" [class.login-avatar--look-away]="isPasswordFocus">
-        <div class="login-avatar__face">
-          <span class="login-avatar__eye login-avatar__eye--left"></span>
-          <span class="login-avatar__eye login-avatar__eye--right"></span>
+    <section class="login-visual">
+      <p class="login-eyebrow">Northstar People OS</p>
+      <h1 class="login-title">Run HR operations from one calm, decision-ready workspace.</h1>
+      <p class="login-subtitle">
+        This demo ships with a synthetic workforce, live dashboards, leave workflows, attendance controls,
+        department planning, and payroll visibility so the product feels complete from first launch.
+      </p>
+
+      <div class="login-highlights">
+        <div class="login-highlight">
+          <strong>Dashboard-led UX</strong>
+          <span>Headcount health, approvals, milestones, and payroll coverage in one place.</span>
+        </div>
+        <div class="login-highlight">
+          <strong>Safe demo data</strong>
+          <span>No private employee information is bundled. Seed data is synthetic and regenerates locally.</span>
+        </div>
+        <div class="login-highlight">
+          <strong>Configurable access</strong>
+          <span>Default demo users work immediately, but credentials can be overridden through environment variables.</span>
         </div>
       </div>
-      <h1 class="login-title">Welcome to HRMS</h1>
-      <p class="login-subtitle">
-        Sign in to manage employees, leave, attendance and payroll.
-      </p>
-    </div>
+
+      <div class="demo-access">
+        <div class="demo-access__header">
+          <h2>Default demo access</h2>
+          <p>Use these starter credentials or replace them with your own environment values.</p>
+        </div>
+        <div class="demo-access__list">
+          <div class="demo-access__item" *ngFor="let account of demoAccounts">
+            <div>
+              <strong>{{ account.username }}</strong>
+              <span>{{ account.role }}</span>
+            </div>
+            <code>{{ account.password }}</code>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <mat-card class="login-card">
       <mat-card-content>
+        <div class="login-card__header">
+          <p class="login-card__eyebrow">Secure sign-in</p>
+          <h2>Access the HR workspace</h2>
+          <p>Authentication is validated against the backend before a session is stored.</p>
+        </div>
+
         <form [formGroup]="form" (ngSubmit)="submit()">
           <mat-form-field appearance="fill" class="full-width">
             <mat-label>Username</mat-label>
-            <input
-              matInput
-              formControlName="username"
-              (input)="onUsernameInput()"
-              (focus)="onUsernameFocus()"
-              (blur)="onUsernameBlur()"
-            >
+            <input matInput formControlName="username" autocomplete="username">
           </mat-form-field>
 
           <mat-form-field appearance="fill" class="full-width">
@@ -35,6 +62,7 @@
               matInput
               type="password"
               formControlName="password"
+              autocomplete="current-password"
               (focus)="onPasswordFocus()"
               (blur)="onPasswordBlur()"
             >
@@ -45,13 +73,12 @@
             color="primary"
             type="submit"
             class="login-button"
-            [disabled]="form.invalid"
+            [disabled]="form.invalid || isSubmitting"
           >
-            Login
+            {{ isSubmitting ? 'Signing in...' : 'Login' }}
           </button>
         </form>
       </mat-card-content>
     </mat-card>
   </div>
 </div>
-

@@ -15,10 +15,9 @@ public class ApiInfoController {
     @GetMapping
     public Map<String, Object> apiRoot() {
         Map<String, Object> body = new HashMap<>();
-        body.put("name", "hrms-backend");
+        body.put("name", "northstar-people-os-api");
         body.put("status", "OK");
         body.put("timestamp", Instant.now().toString());
         return body;
     }
 }
-

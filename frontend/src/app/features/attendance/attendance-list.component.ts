@@ -38,13 +38,15 @@ export class AttendanceListComponent implements OnInit {
 
   ngOnInit(): void {
     this.employeeApi
-      .list({ page: 0, size: 200 })
+      .list({ page: 0, size: 300 })
       .subscribe(page => (this.employees = page.content));
     this.load();
   }
 
   load(): void {
-    this.attendanceApi.list().subscribe(r => (this.records = r));
+    this.attendanceApi.list().subscribe(records => {
+      this.records = [...records].sort((left, right) => right.workDate.localeCompare(left.workDate));
+    });
   }
 
   save(): void {
@@ -61,7 +63,7 @@ export class AttendanceListComponent implements OnInit {
     };
     this.attendanceApi.createOrUpdate(payload).subscribe({
       next: () => {
-        this.snackBar.open('Attendance saved', 'Close', { duration: 2000 });
+        this.snackBar.open('Attendance saved', 'Close', { duration: 2500 });
         this.load();
       }
     });
@@ -76,10 +78,50 @@ export class AttendanceListComponent implements OnInit {
     }
     this.attendanceApi.delete(record.id).subscribe({
       next: () => {
-        this.snackBar.open('Attendance deleted', 'Close', { duration: 2000 });
+        this.snackBar.open('Attendance deleted', 'Close', { duration: 2500 });
         this.load();
       }
     });
   }
-}
 
+  get todayRecords(): AttendanceRecord[] {
+    const today = new Date().toISOString().substring(0, 10);
+    return this.records.filter(record => record.workDate === today);
+  }
+
+  get presentCount(): number {
+    return this.todayRecords.filter(record => record.status === 'PRESENT' || record.status === 'HALF_DAY').length;
+  }
+
+  get lateCount(): number {
+    return this.todayRecords.filter(record => record.status === 'LATE').length;
+  }
+
+  get absentCount(): number {
+    return this.todayRecords.filter(record => record.status === 'ABSENT').length;
+  }
+
+  get averageCheckIn(): string {
+    const checkIns = this.todayRecords
+      .map(record => record.checkInTime)
+      .filter((value): value is string => !!value);
+
+    if (!checkIns.length) {
+      return 'No check-ins yet';
+    }
+
+    const totalMinutes = checkIns.reduce((sum, time) => {
+      const [hours, minutes] = time.split(':').map(Number);
+      return sum + (hours * 60) + minutes;
+    }, 0);
+
+    const averageMinutes = Math.round(totalMinutes / checkIns.length);
+    const hours = Math.floor(averageMinutes / 60).toString().padStart(2, '0');
+    const minutes = (averageMinutes % 60).toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  statusClass(status: AttendanceStatus): string {
+    return `status-pill--${status.toLowerCase()}`;
+  }
+}

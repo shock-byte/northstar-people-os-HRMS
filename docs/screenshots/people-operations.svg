@@ -1,0 +1,75 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC"/>
+      <stop offset="0.55" stop-color="#EFF6FF"/>
+      <stop offset="1" stop-color="#F8FAFC"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg2)"/>
+  <circle cx="150" cy="80" r="190" fill="#FBBF24" fill-opacity="0.10"/>
+  <circle cx="1450" cy="120" r="220" fill="#38BDF8" fill-opacity="0.12"/>
+
+  <rect x="42" y="44" width="1516" height="812" rx="36" fill="#FFFFFF" fill-opacity="0.84" stroke="#CBD5E1"/>
+  <text x="100" y="110" fill="#0284C7" font-size="15" font-family="Arial, sans-serif" letter-spacing="4">EMPLOYEES</text>
+  <text x="100" y="168" fill="#0F172A" font-size="58" font-family="Georgia, serif" font-weight="700">Manage the people directory, assignments, and compensation bands.</text>
+
+  <g>
+    <rect x="100" y="220" width="322" height="138" rx="24" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="128" y="258" fill="#64748B" font-size="15" font-family="Arial, sans-serif" letter-spacing="3">VISIBLE EMPLOYEES</text>
+    <text x="128" y="318" fill="#0F172A" font-size="56" font-family="Arial, sans-serif" font-weight="700">12</text>
+    <text x="128" y="346" fill="#64748B" font-size="18" font-family="Arial, sans-serif">11 currently active</text>
+  </g>
+  <g>
+    <rect x="446" y="220" width="322" height="138" rx="24" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="474" y="258" fill="#64748B" font-size="15" font-family="Arial, sans-serif" letter-spacing="3">NEW HIRES</text>
+    <text x="474" y="318" fill="#0F172A" font-size="56" font-family="Arial, sans-serif" font-weight="700">3</text>
+    <text x="474" y="346" fill="#64748B" font-size="18" font-family="Arial, sans-serif">Joined in the last 90 days</text>
+  </g>
+  <g>
+    <rect x="792" y="220" width="322" height="138" rx="24" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="820" y="258" fill="#64748B" font-size="15" font-family="Arial, sans-serif" letter-spacing="3">INACTIVE RECORDS</text>
+    <text x="820" y="318" fill="#0F172A" font-size="56" font-family="Arial, sans-serif" font-weight="700">1</text>
+    <text x="820" y="346" fill="#64748B" font-size="18" font-family="Arial, sans-serif">Employees not currently active</text>
+  </g>
+  <g>
+    <rect x="1138" y="220" width="322" height="138" rx="24" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="1166" y="258" fill="#64748B" font-size="15" font-family="Arial, sans-serif" letter-spacing="3">MONTHLY SALARY BASE</text>
+    <text x="1166" y="318" fill="#0F172A" font-size="48" font-family="Arial, sans-serif" font-weight="700">INR 10.7L</text>
+    <text x="1166" y="346" fill="#64748B" font-size="18" font-family="Arial, sans-serif">Visible workforce cost before extras</text>
+  </g>
+
+  <rect x="100" y="394" width="930" height="394" rx="28" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="138" y="438" fill="#0284C7" font-size="14" font-family="Arial, sans-serif" letter-spacing="3">PEOPLE DIRECTORY</text>
+  <text x="138" y="480" fill="#0F172A" font-size="34" font-family="Georgia, serif" font-weight="700">Search and monitor the workforce</text>
+
+  <rect x="138" y="516" width="754" height="54" rx="18" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text x="166" y="550" fill="#64748B" font-size="18" font-family="Arial, sans-serif">Search people or roles</text>
+
+  <rect x="138" y="602" width="854" height="150" rx="22" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <line x1="138" y1="648" x2="992" y2="648" stroke="#CBD5E1"/>
+  <text x="166" y="632" fill="#64748B" font-size="15" font-family="Arial, sans-serif" letter-spacing="3">PERSON</text>
+  <text x="470" y="632" fill="#64748B" font-size="15" font-family="Arial, sans-serif" letter-spacing="3">ROLE</text>
+  <text x="698" y="632" fill="#64748B" font-size="15" font-family="Arial, sans-serif" letter-spacing="3">DEPARTMENT</text>
+  <text x="846" y="632" fill="#64748B" font-size="15" font-family="Arial, sans-serif" letter-spacing="3">STATUS</text>
+
+  <text x="166" y="690" fill="#0F172A" font-size="24" font-family="Arial, sans-serif" font-weight="700">Aisha Khan</text>
+  <text x="166" y="718" fill="#64748B" font-size="18" font-family="Arial, sans-serif">aisha.khan@northstarhr.demo</text>
+  <text x="470" y="690" fill="#0F172A" font-size="22" font-family="Arial, sans-serif" font-weight="700">Senior HR Manager</text>
+  <text x="470" y="718" fill="#64748B" font-size="18" font-family="Arial, sans-serif">Hired Mar 19, 2021</text>
+  <text x="698" y="704" fill="#0F172A" font-size="22" font-family="Arial, sans-serif">People Operations</text>
+  <rect x="846" y="678" width="98" height="34" rx="17" fill="#DCFCE7"/>
+  <text x="868" y="700" fill="#166534" font-size="16" font-family="Arial, sans-serif" font-weight="700">ACTIVE</text>
+
+  <rect x="1072" y="394" width="388" height="394" rx="28" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="1110" y="438" fill="#0284C7" font-size="14" font-family="Arial, sans-serif" letter-spacing="3">EMPLOYEE EDITOR</text>
+  <text x="1110" y="480" fill="#0F172A" font-size="34" font-family="Georgia, serif" font-weight="700">Create or update a person record</text>
+
+  <rect x="1110" y="520" width="150" height="54" rx="18" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <rect x="1280" y="520" width="150" height="54" rx="18" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <rect x="1110" y="594" width="320" height="54" rx="18" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <rect x="1110" y="668" width="320" height="54" rx="18" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <rect x="1110" y="742" width="220" height="52" rx="20" fill="#1D4ED8"/>
+  <text x="1152" y="774" fill="#FFFFFF" font-size="20" font-family="Arial, sans-serif" font-weight="700">Create employee</text>
+</svg>

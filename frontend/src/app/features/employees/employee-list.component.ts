@@ -14,7 +14,7 @@ import { Page } from '../../core/models/page.model';
 })
 export class EmployeeListComponent implements OnInit {
 
-  displayedColumns = ['name', 'email', 'department', 'status', 'actions'];
+  displayedColumns = ['person', 'jobTitle', 'department', 'salary', 'status', 'actions'];
   data: Employee[] = [];
   total = 0;
 
@@ -32,6 +32,7 @@ export class EmployeeListComponent implements OnInit {
     private readonly snackBar: MatSnackBar
   ) {
     this.filterForm = this.fb.group({
+      query: [''],
       departmentId: [null],
       status: [null]
     });
@@ -50,7 +51,8 @@ export class EmployeeListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.departmentApi.list().subscribe(depts => (this.departments = depts));
+    this.departmentApi.list().subscribe(departments => (this.departments = departments));
+    this.startCreate();
     this.load();
   }
 
@@ -58,10 +60,11 @@ export class EmployeeListComponent implements OnInit {
     const filters = this.filterForm.value;
     this.employeeApi
       .list({
+        query: filters.query?.trim() || undefined,
         departmentId: filters.departmentId ?? undefined,
         status: filters.status ?? undefined,
         page: 0,
-        size: 100
+        size: 200
       })
       .subscribe((page: Page<Employee>) => {
         this.data = page.content;
@@ -74,7 +77,11 @@ export class EmployeeListComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.filterForm.reset();
+    this.filterForm.reset({
+      query: '',
+      departmentId: null,
+      status: null
+    });
     this.load();
   }
 
@@ -86,11 +93,11 @@ export class EmployeeListComponent implements OnInit {
     });
   }
 
-  startEdit(emp: Employee): void {
-    this.editing = emp;
+  startEdit(employee: Employee): void {
+    this.editing = employee;
     this.form.reset({
-      ...emp,
-      hireDate: emp.hireDate ? new Date(emp.hireDate) : null
+      ...employee,
+      hireDate: employee.hireDate ? new Date(employee.hireDate) : null
     });
   }
 
@@ -98,43 +105,72 @@ export class EmployeeListComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
+
     const raw = this.form.value;
     const payload: Employee = {
       ...raw,
       hireDate: (raw.hireDate as Date).toISOString().substring(0, 10)
     };
 
-    if (this.editing && this.editing.id != null) {
-      this.employeeApi.update(this.editing.id, { ...this.editing, ...payload }).subscribe({
-        next: () => {
-          this.snackBar.open('Employee updated', 'Close', { duration: 2000 });
-          this.load();
-          this.editing = null;
-        }
-      });
-    } else {
-      this.employeeApi.create(payload).subscribe({
-        next: () => {
-          this.snackBar.open('Employee created', 'Close', { duration: 2000 });
-          this.load();
-        }
-      });
-    }
+    const request = this.editing?.id
+      ? this.employeeApi.update(this.editing.id, { ...this.editing, ...payload })
+      : this.employeeApi.create(payload);
+
+    request.subscribe({
+      next: () => {
+        this.snackBar.open(
+          this.editing ? 'Employee updated' : 'Employee created',
+          'Close',
+          { duration: 2500 }
+        );
+        this.load();
+        this.startCreate();
+      }
+    });
   }
 
-  delete(emp: Employee): void {
-    if (!emp.id) {
+  delete(employee: Employee): void {
+    if (!employee.id) {
       return;
     }
-    if (!confirm(`Delete employee "${emp.firstName} ${emp.lastName}"?`)) {
+    if (!confirm(`Delete employee "${employee.firstName} ${employee.lastName}"?`)) {
       return;
     }
-    this.employeeApi.delete(emp.id).subscribe({
+    this.employeeApi.delete(employee.id).subscribe({
       next: () => {
-        this.snackBar.open('Employee deleted', 'Close', { duration: 2000 });
+        this.snackBar.open('Employee deleted', 'Close', { duration: 2500 });
         this.load();
       }
     });
   }
-}
 
+  get activeCount(): number {
+    return this.data.filter(employee => employee.status === 'ACTIVE').length;
+  }
+
+  get inactiveCount(): number {
+    return this.data.filter(employee => employee.status !== 'ACTIVE').length;
+  }
+
+  get newHiresCount(): number {
+    const threshold = new Date();
+    threshold.setMonth(threshold.getMonth() - 3);
+    return this.data.filter(employee => new Date(employee.hireDate) >= threshold).length;
+  }
+
+  get monthlyPayroll(): number {
+    return this.data.reduce((sum, employee) => sum + (employee.monthlySalary ?? 0), 0);
+  }
+
+  formatCurrency(value?: number): string {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(value ?? 0);
+  }
+
+  statusClass(status: EmploymentStatus): string {
+    return `status-pill--${status.toLowerCase()}`;
+  }
+}
