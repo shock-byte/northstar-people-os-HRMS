@@ -38,8 +38,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/api/v1", "/api/v1/info").permitAll()
                         .requestMatchers("/api/v1/payroll/**").hasAnyRole("ADMIN", "HR")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
@@ -71,4 +73,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-
